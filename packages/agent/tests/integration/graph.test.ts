@@ -23,7 +23,7 @@ import { config } from 'dotenv';
 config({ path: resolve(process.cwd(), '.env') });
 
 // Set required env vars for env.ts if not already set
-process.env.OPENROUTER_API_KEY ??= '';
+// OPENROUTER_API_KEY must be set in .env
 process.env.BOT_TOKEN ??= 'dummy:token_for_tests';
 process.env.WEBAPP_URL ??= 'https://example.com';
 process.env.DB_PATH ??= ':memory:'; // Use in-memory SQLite for integration tests

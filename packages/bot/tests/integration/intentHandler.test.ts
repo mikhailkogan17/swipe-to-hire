@@ -9,7 +9,8 @@ import { ChatOpenRouter } from '@langchain/openrouter';
 import { HumanMessage } from 'langchain';
 import { z } from 'zod';
 
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY ?? '';
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+if (!OPENROUTER_API_KEY) throw new Error('OPENROUTER_API_KEY env var is required for integration tests');
 
 const IntentSchema = z.object({
   intent: z.enum(['update_cv', 'update_prefs', 'add_insight', 'unknown']),
