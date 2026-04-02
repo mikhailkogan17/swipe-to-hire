@@ -1,0 +1,19 @@
+{
+  "name": "@swipe-to-hire/agent",
+  "version": "0.1.0",
+  "description": "LangGraph agent core — graph, DB, env",
+  "type": "module",
+  "main": "graph.ts",
+  "exports": {
+    ".": "./graph.ts",
+    "./graph.js": "./graph.ts",
+    "./db.js": "./db.ts",
+    "./env.js": "./env.ts",
+    "./env": "./env.ts",
+    "./graph": "./graph.ts",
+    "./db": "./db.ts"
+  },
+  "dependencies": {
+    "@swipe-to-hire/types": "*"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/types" },
+    { "path": "./packages/agent" },
+    { "path": "./packages/bot" },
+    { "path": "./packages/cli" },
+    { "path": "./packages/miniapp" }
+  ]
+}

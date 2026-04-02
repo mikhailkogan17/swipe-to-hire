@@ -1,0 +1,15 @@
+{
+  "name": "@swipe-to-hire/cli",
+  "version": "0.1.0",
+  "description": "CLI tool for testing the swipe-to-hire graph without Telegram",
+  "type": "module",
+  "main": "index.ts",
+  "scripts": {
+    "start": "tsx index.ts",
+    "dev": "tsx watch index.ts"
+  },
+  "dependencies": {
+    "@swipe-to-hire/agent": "*",
+    "@swipe-to-hire/types": "*"
+  }
+}

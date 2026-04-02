@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+# Pre-commit hook: block secrets + typecheck
+[ -n "$CI" ] && exit 0
+
+echo "Checking for secrets..."
+
+FORBIDDEN_PATTERNS=(
+  'BOT_TOKEN=[0-9]'
+  'sk-or-[a-zA-Z0-9]'
+  'ls__[a-zA-Z0-9]'
+  'RAPIDAPI_KEY=[a-zA-Z0-9]'
+  'LANGSMITH_API_KEY=[a-zA-Z0-9]'
+  'ghp_[a-zA-Z0-9]{36}'
+)
+
+STAGED=$(git diff --cached --name-only --diff-filter=ACM)
+EXIT_CODE=0
+
+for pattern in "${FORBIDDEN_PATTERNS[@]}"; do
+  MATCHES=$(echo "$STAGED" | xargs grep -lE "$pattern" 2>/dev/null || true)
+  if [ -n "$MATCHES" ]; then
+    echo "Secret pattern found: $pattern"
+    echo "  Files: $MATCHES"
+    EXIT_CODE=1
+  fi
+done
+
+if [ $EXIT_CODE -ne 0 ]; then
+  echo ""
+  echo "Commit blocked — remove secrets before committing."
+  echo "Use .env files (gitignored) instead."
+  exit 1
+fi
+
+# Typecheck
+echo "Type checking..."
+npx tsc --noEmit 2>&1 | head -30 || exit 1
+
+echo "Pre-commit checks passed"

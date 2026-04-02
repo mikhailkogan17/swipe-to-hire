@@ -1,0 +1,37 @@
+title = "swipe-to-hire gitleaks config"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "telegram-bot-token"
+description = "Telegram Bot Token"
+regex = '''\b[0-9]{8,10}:[A-Za-z0-9_-]{35}\b'''
+keywords = ["bot", "token"]
+
+[[rules]]
+id = "openrouter-api-key"
+description = "OpenRouter API Key"
+regex = '''sk-or-[a-zA-Z0-9\-_]{20,}'''
+keywords = ["openrouter"]
+
+[[rules]]
+id = "langsmith-api-key"
+description = "LangSmith API Key"
+regex = '''ls__[a-zA-Z0-9]{32,}'''
+keywords = ["langsmith"]
+
+[[rules]]
+id = "rapidapi-key"
+description = "RapidAPI Key"
+regex = '''(?i)rapidapi[_\-]?key[=:\s]["']?[A-Za-z0-9]{20,}'''
+keywords = ["rapidapi"]
+
+[allowlist]
+paths = [
+  '''\.gitleaks\.toml$''',
+  '''package-lock\.json$''',
+  '''node_modules/''',
+  '''dist/''',
+  '''\.env\.example$''',
+]

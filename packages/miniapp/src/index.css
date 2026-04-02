@@ -1,0 +1,417 @@
+/* ===========================
+   Job Matcher Mini App — Global CSS
+   =========================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg: #0e0e14;
+  --bg-card: #16161f;
+  --bg-card2: #1e1e2e;
+  --accent: #7c6af7;
+  --accent-grad: linear-gradient(135deg, #7c6af7 0%, #a78bfa 100%);
+  --green: #4ade80;
+  --red: #f87171;
+  --yellow: #fbbf24;
+  --text: #f0f0f8;
+  --text-dim: #8888aa;
+  --border: rgba(255,255,255,0.07);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body, #root {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- Layout ---- */
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.page {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ---- Typography ---- */
+
+h1 { font-size: 22px; font-weight: 700; }
+h2 { font-size: 18px; font-weight: 600; }
+h3 { font-size: 15px; font-weight: 600; }
+p  { color: var(--text-dim); font-size: 14px; }
+
+/* ---- Buttons ---- */
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px 20px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  text-decoration: none;
+}
+
+.btn:active { transform: scale(0.97); }
+
+.btn-primary {
+  background: var(--accent-grad);
+  color: #fff;
+}
+
+.btn-secondary {
+  background: var(--bg-card2);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-dim);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* ---- Cards ---- */
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+
+/* ---- Input ---- */
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.input-group label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-dim);
+}
+
+.input {
+  width: 100%;
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: 12px 14px;
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.input:focus { border-color: var(--accent); }
+.input::placeholder { color: var(--text-dim); }
+
+/* ---- Badge ---- */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge-green { background: rgba(74,222,128,0.15); color: var(--green); }
+.badge-red   { background: rgba(248,113,113,0.15); color: var(--red);   }
+.badge-yellow{ background: rgba(251,191,36,0.15);  color: var(--yellow);}
+.badge-purple{ background: rgba(124,106,247,0.15); color: var(--accent);}
+
+/* ---- Progress stepper ---- */
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+}
+
+.step-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--bg-card2);
+  transition: background 0.2s, width 0.2s;
+}
+
+.step-dot.active {
+  width: 24px;
+  border-radius: 4px;
+  background: var(--accent);
+}
+
+.step-dot.done {
+  background: var(--green);
+}
+
+/* ---- Swipe card stack ---- */
+
+.swipe-container {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.swipe-card {
+  position: absolute;
+  width: calc(100% - 32px);
+  max-height: 75vh;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.swipe-card-inner {
+  padding: 20px;
+  overflow-y: auto;
+  max-height: 75vh;
+}
+
+.swipe-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.company-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.job-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 4px 0;
+}
+
+.match-score {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.location-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.agent-notes {
+  background: var(--bg-card2);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+.swipe-actions {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  justify-content: center;
+}
+
+.swipe-btn {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: none;
+  font-size: 26px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.12s, box-shadow 0.12s;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+
+.swipe-btn:active { transform: scale(0.88); }
+.swipe-btn-dislike { background: rgba(248,113,113,0.15); }
+.swipe-btn-like    { background: rgba(74,222,128,0.15); }
+
+/* ---- Bottom nav ---- */
+
+.bottom-nav {
+  display: flex;
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  padding: 8px 0 env(safe-area-inset-bottom, 8px);
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 10px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.nav-item.active { color: var(--accent); }
+.nav-icon { font-size: 22px; }
+
+/* ---- Liked jobs list ---- */
+
+.job-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  text-decoration: none;
+}
+
+.job-list-item-info { flex: 1; overflow: hidden; }
+.job-list-item-title { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.job-list-item-sub { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+
+/* ---- Empty state ---- */
+
+.empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+  padding: 32px;
+}
+
+.empty-icon { font-size: 52px; }
+
+/* ---- Checkbox / toggle ---- */
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.checkbox-row input[type=checkbox] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+/* ---- Region chips ---- */
+
+.chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  padding: 6px 14px;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+  background: var(--bg-card2);
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.chip.selected {
+  background: rgba(124,106,247,0.2);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ---- Scrollbar ---- */
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ---- Animations ---- */
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fade-up { animation: fadeUp 0.3s ease; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+.loading { animation: pulse 1.2s infinite; }

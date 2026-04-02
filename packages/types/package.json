@@ -1,0 +1,11 @@
+{
+  "name": "@swipe-to-hire/types",
+  "version": "0.1.0",
+  "description": "Shared types for swipe-to-hire monorepo",
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "license": "MIT"
+}

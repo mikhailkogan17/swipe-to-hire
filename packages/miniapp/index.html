@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Swipe To Hire</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      window.onerror = function(msg, url, line, col, error) {
+        document.body.innerHTML = '<div style="color:red;padding:20px;font-family:monospace;word-break:break-all;"><b>Critical Error:</b><br>' + 
+          msg + '<br><br><b>Stack:</b><br>' + (error && error.stack ? error.stack : 'N/A') + '<br><br><b>Line:</b> ' + line + 
+          '</div>';
+      };
+      window.addEventListener('unhandledrejection', function(event) {
+        document.body.innerHTML = '<div style="color:red;padding:20px;font-family:monospace;word-break:break-all;"><b>Unhandled Promise Rejection:</b><br>' + 
+          (event.reason && event.reason.message ? event.reason.message : event.reason) + '</div>';
+      });
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

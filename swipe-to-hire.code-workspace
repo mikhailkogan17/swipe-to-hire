@@ -1,0 +1,95 @@
+{
+  "folders": [{ "name": "swipe-to-hire", "path": "." }],
+  "settings": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit",
+      "source.fixAll": "explicit"
+    },
+    "editor.rulers": [100],
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 1000,
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "files.associations": {
+      "Dockerfile*": "dockerfile",
+      "*.yaml": "yaml",
+      "*.yml": "yaml"
+    },
+    "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+    "[typescriptreact]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+    "[javascript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+    "[json]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+    "[jsonc]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+    "[yaml]": { "editor.defaultFormatter": "redhat.vscode-yaml" },
+    "[markdown]": {
+      "editor.defaultFormatter": "yzhang.markdown-all-in-one",
+      "editor.wordWrap": "on"
+    },
+    "yaml.validate": true,
+    "yaml.format.enable": true,
+    "yaml.schemas": {
+      "https://json.schemastore.org/docker-compose.json": ["docker-compose*.yml"]
+    },
+    "git.confirmSync": false,
+    "git.autofetch": true,
+    "files.exclude": {
+      "**/.DS_Store": true,
+      "**/node_modules": true,
+      "**/dist": true
+    },
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/.git": true,
+      "**/dist": true
+    },
+    "cSpell.words": [
+      "langchain",
+      "langgraph",
+      "langsmith",
+      "openrouter",
+      "rapidapi",
+      "fastify",
+      "telegraf",
+      "miniapp",
+      "jsearch",
+      "swipe",
+      "sqlite"
+    ]
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-azuretools.vscode-docker",
+      "redhat.vscode-yaml",
+      "esbenp.prettier-vscode",
+      "dbaeumer.vscode-eslint",
+      "yzhang.markdown-all-in-one",
+      "bierner.markdown-mermaid",
+      "editorconfig.editorconfig",
+      "streetsidesoftware.code-spell-checker"
+    ]
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Bot: Dev",
+        "type": "node",
+        "request": "launch",
+        "runtimeExecutable": "npx",
+        "runtimeArgs": ["tsx", "packages/bot/index.ts"],
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}"
+      },
+      {
+        "name": "CLI: Run",
+        "type": "node",
+        "request": "launch",
+        "runtimeExecutable": "npx",
+        "runtimeArgs": ["tsx", "packages/cli/index.ts"],
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}"
+      }
+    ]
+  }
+}
