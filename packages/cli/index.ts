@@ -55,7 +55,12 @@ async function main() {
   const graph = await buildGraph({ telegramUserId: userId });
 
   const result = await graph.invoke(
-    { messages: [] },
+    {
+      telegramUserId: userId,
+      openrouterKey: env.OPENROUTER_API_KEY,
+      rapidApiKey: env.RAPIDAPI_KEY,
+      messages: [],
+    },
     {
       configurable: { thread_id: `cli-${userId}-${Date.now()}` },
       callbacks: [new ToolCallLogger()],
@@ -66,12 +71,17 @@ async function main() {
   const matches = result.matches ?? [];
   console.log(`\n✅ Found ${matches.length} matches:`);
   for (const match of matches) {
-    console.log(`  [${match.conformancePercentage}%] ${match.posting.title} at ${match.posting.company}`);
+    console.log(
+      `  [${match.conformancePercentage}%] ${match.posting.title} at ${match.posting.company}`
+    );
     if (match.agentNotes) console.log(`       → ${match.agentNotes}`);
   }
 
   if (matches.length > 0) {
-    saveJobs(userId, matches.map((m: any) => m.posting));
+    saveJobs(
+      userId,
+      matches.map((m: any) => m.posting)
+    );
     console.log(`\n💾 Saved ${matches.length} jobs to DB for user ${telegramUserId}.`);
   }
 }

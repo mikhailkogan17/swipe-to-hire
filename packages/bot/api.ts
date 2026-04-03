@@ -17,7 +17,9 @@ import {
   getUserById,
   db,
 } from '@swipe-to-hire/agent/db.js';
+import { buildProfileSetupGraph } from '@swipe-to-hire/agent/graph.js';
 import { runJobSearchForUser } from './scheduler.js';
+import { bot, profileReplyWaiters } from './bot.js';
 
 const app = Fastify({ logger: false });
 
@@ -57,7 +59,7 @@ app.post<{
     preferences?: Record<string, unknown>;
     scheduleHour?: number;
     region?: string;
-  }
+  };
 }>('/onboarding/complete', async (req, reply) => {
   const { telegramUserId, cvUrl, preferences, scheduleHour, region } = req.body;
   const user = getUser(telegramUserId);
@@ -69,30 +71,31 @@ app.post<{
   if (region) updateUserRegion(telegramUserId, region);
   markUserOnboarded(telegramUserId);
 
-  // TODO(user): Run buildProfileGraph HERE (before runJobSearchForUser) to:
-  //   1. Extract CV profile via LLM with real Telegram HITL (no interrupt())
-  //   2. Save profile to DB so the main graph skips re-extraction
-  //
-  // Step-by-step:
-  //   a. Import { buildProfileGraph } from '@swipe-to-hire/agent/graph.js'
-  //   b. Import { bot, profileReplyWaiters } from './bot.js'
-  //   c. Await buildProfileGraph({
-  //        telegramUserId,
-  //        sendMessage: (text) => bot.telegram.sendMessage(telegramUserId, text),
-  //        waitForReply: () => new Promise(resolve => profileReplyWaiters.set(telegramUserId, resolve)),
-  //        apiKeys: { openrouterKey: user.openrouter_api_key ?? undefined },
-  //      })
-  //   d. THEN call runJobSearchForUser (it will use the already-cached profile from DB)
-  //
-  // Note: This makes /onboarding/complete long-running if HITL is triggered.
-  //   Option A: run it in background (non-blocking), send Telegram message when done
-  //   Option B: return 202 Accepted immediately, let client poll /profile for onboarded=true
+  // Run profile extraction via Telegram HITL (non-blocking background task).
+  // After this completes the DB has the profile cached — job-search graph skips extraction.
+  const openrouterKey = user.openrouter_api_key ?? env.OPENROUTER_API_KEY;
 
-  // Trigger initial job search in the background immediately
-  runJobSearchForUser(telegramUserId, user.id, {
-    openrouterKey: user.openrouter_api_key ?? undefined,
-    rapidApiKey: user.rapidapi_key ?? undefined,
-  }).catch((err: unknown) => console.error("Initial search failed:", err));
+  const profileGraph = buildProfileSetupGraph({
+    telegramUserId,
+    sendMessage: async text => {
+      await bot.telegram.sendMessage(telegramUserId, text);
+    },
+    waitForReply: () => new Promise(resolve => profileReplyWaiters.set(telegramUserId, resolve)),
+    apiKeys: { openrouterKey },
+  });
+
+  // Fire profile setup + job search in background (non-blocking)
+  profileGraph
+    .invoke({ telegramUserId, openrouterKey, messages: [] })
+    .then(() => {
+      console.log(`✅ Profile setup completed for user ${telegramUserId}`);
+      // Trigger initial job search after profile is ready
+      return runJobSearchForUser(telegramUserId, user.id, {
+        openrouterKey: user.openrouter_api_key ?? undefined,
+        rapidApiKey: user.rapidapi_key ?? undefined,
+      });
+    })
+    .catch((err: unknown) => console.error('Profile setup / initial search failed:', err));
 
   return { success: true };
 });
@@ -109,12 +112,15 @@ app.post<{
 
 // --- Preferences ---
 
-app.get<{ Params: { telegramUserId: string } }>('/preferences/:telegramUserId', async (req, reply) => {
-  const telegramUserId = Number(req.params.telegramUserId);
-  const user = getUser(telegramUserId);
-  if (!user) return reply.status(404).send({ error: 'User not found' });
-  return getUserPreferences(telegramUserId);
-});
+app.get<{ Params: { telegramUserId: string } }>(
+  '/preferences/:telegramUserId',
+  async (req, reply) => {
+    const telegramUserId = Number(req.params.telegramUserId);
+    const user = getUser(telegramUserId);
+    if (!user) return reply.status(404).send({ error: 'User not found' });
+    return getUserPreferences(telegramUserId);
+  }
+);
 
 app.patch<{
   Params: { telegramUserId: string };
@@ -137,12 +143,15 @@ app.get<{ Params: { telegramUserId: string } }>('/jobs/:telegramUserId', async (
   return { jobs: getPendingJobs(user.id) };
 });
 
-app.get<{ Params: { telegramUserId: string } }>('/jobs/:telegramUserId/liked', async (req, reply) => {
-  const telegramUserId = Number(req.params.telegramUserId);
-  const user = getUser(telegramUserId);
-  if (!user) return reply.status(404).send({ error: 'User not found' });
-  return { jobs: getLikedJobs(user.id) };
-});
+app.get<{ Params: { telegramUserId: string } }>(
+  '/jobs/:telegramUserId/liked',
+  async (req, reply) => {
+    const telegramUserId = Number(req.params.telegramUserId);
+    const user = getUser(telegramUserId);
+    if (!user) return reply.status(404).send({ error: 'User not found' });
+    return { jobs: getLikedJobs(user.id) };
+  }
+);
 
 // --- Swipe ---
 

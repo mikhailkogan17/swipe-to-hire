@@ -10,7 +10,6 @@ import { HumanMessage } from 'langchain';
 import { z } from 'zod';
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-if (!OPENROUTER_API_KEY) throw new Error('OPENROUTER_API_KEY env var is required for integration tests');
 
 const IntentSchema = z.object({
   intent: z.enum(['update_cv', 'update_prefs', 'add_insight', 'unknown']),
@@ -27,6 +26,7 @@ Return ONLY valid JSON matching: { "intent": "...", "preferencesDelta"?: {...}, 
 `.trim();
 
 async function classifyIntent(userMessage: string) {
+  if (!OPENROUTER_API_KEY) throw new Error('OPENROUTER_API_KEY not set');
   const model = new ChatOpenRouter({
     model: 'openai/gpt-4o-mini',
     apiKey: OPENROUTER_API_KEY,
@@ -43,23 +43,27 @@ async function classifyIntent(userMessage: string) {
 
 describe('classifyIntent (integration)', () => {
   it('classifies "no Python jobs" as update_prefs with excludedSkills', async () => {
+    if (!OPENROUTER_API_KEY) return;
     const intent = await classifyIntent('no Python jobs please');
     expect(intent.intent).toBe('update_prefs');
     expect(intent.preferencesDelta?.excludedSkills).toContain('Python');
   });
 
   it('classifies "only remote EU positions" as update_prefs', async () => {
+    if (!OPENROUTER_API_KEY) return;
     const intent = await classifyIntent('I only want remote EU positions');
     expect(intent.intent).toBe('update_prefs');
     expect(intent.preferencesDelta?.remoteOnly).toBe(true);
   });
 
   it('classifies "here is my new cv" as update_cv', async () => {
+    if (!OPENROUTER_API_KEY) return;
     const intent = await classifyIntent('here is my new cv');
     expect(intent.intent).toBe('update_cv');
   });
 
   it('classifies rejection insight as add_insight', async () => {
+    if (!OPENROUTER_API_KEY) return;
     const intent = await classifyIntent('Got rejected from Wix — they said I need Java experience');
     expect(intent.intent).toBe('add_insight');
     expect(intent.insightText).toBeTruthy();
@@ -67,6 +71,7 @@ describe('classifyIntent (integration)', () => {
   });
 
   it('classifies random message as unknown', async () => {
+    if (!OPENROUTER_API_KEY) return;
     const intent = await classifyIntent('What is the weather today?');
     expect(intent.intent).toBe('unknown');
   });

@@ -28,19 +28,22 @@ process.env.BOT_TOKEN ??= 'dummy:token_for_tests';
 process.env.WEBAPP_URL ??= 'https://example.com';
 process.env.DB_PATH ??= ':memory:'; // Use in-memory SQLite for integration tests
 
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY;
 
 describe('buildGraph + graph.invoke (integration)', () => {
-  it('skips if RAPIDAPI_KEY is not set', async () => {
-    if (!RAPIDAPI_KEY) {
-      console.warn('⚠️  RAPIDAPI_KEY not set — skipping full graph integration test');
+  it('skips if API keys are not set', async () => {
+    if (!RAPIDAPI_KEY || !OPENROUTER_API_KEY) {
+      console.warn(
+        '⚠️  RAPIDAPI_KEY or OPENROUTER_API_KEY not set — skipping full graph integration test'
+      );
       return;
     }
   });
 
   it('builds graph and returns matches for a real CV', async () => {
-    if (!RAPIDAPI_KEY) {
-      console.warn('⚠️  RAPIDAPI_KEY not set — skipping');
+    if (!RAPIDAPI_KEY || !OPENROUTER_API_KEY) {
+      console.warn('⚠️  API keys not set — skipping');
       return;
     }
 
@@ -50,13 +53,18 @@ describe('buildGraph + graph.invoke (integration)', () => {
     const graph = await buildGraph({
       telegramUserId: 0, // 0 = no DB user; uses CV_URL from env fallback
       apiKeys: {
-        openrouterKey: process.env.OPENROUTER_API_KEY,
+        openrouterKey: OPENROUTER_API_KEY,
         rapidApiKey: RAPIDAPI_KEY,
       },
     });
 
     const result = await graph.invoke(
-      { messages: [] },
+      {
+        messages: [],
+        telegramUserId: 0,
+        openrouterKey: OPENROUTER_API_KEY,
+        rapidApiKey: RAPIDAPI_KEY,
+      },
       { configurable: { thread_id: 'integration-test-0' }, recursionLimit: 50 }
     );
 
@@ -73,7 +81,9 @@ describe('buildGraph + graph.invoke (integration)', () => {
       expect(match.conformancePercentage).toBeGreaterThanOrEqual(0);
       expect(match.conformancePercentage).toBeLessThanOrEqual(100);
       expect(typeof match.needsHumanReview).toBe('boolean');
-      console.log(`\n✅ Got ${result.matches.length} matches. Top match: "${match.posting.title}" at ${match.posting.company} (${match.conformancePercentage}%)`);
+      console.log(
+        `\n✅ Got ${result.matches.length} matches. Top match: "${match.posting.title}" at ${match.posting.company} (${match.conformancePercentage}%)`
+      );
     } else {
       console.warn('⚠️  Graph returned 0 matches — check if jobs exist for the current CV profile');
     }

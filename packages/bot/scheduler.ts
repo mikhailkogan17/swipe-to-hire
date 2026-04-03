@@ -2,6 +2,7 @@ import cron from 'node-cron';
 import { getAllUsers, saveJobs } from '@swipe-to-hire/agent/db.js';
 import { notifyJobsReady, notifyNoJobs } from './bot.js';
 import { buildGraph } from '@swipe-to-hire/agent/graph.js';
+import { env } from '@swipe-to-hire/agent/env.js';
 
 // Run every hour — check which users have their schedule_hour matching current UTC hour
 export function startScheduler(): void {
@@ -30,10 +31,13 @@ export async function runJobSearchForUser(
 ): Promise<void> {
   console.log(`🔍 Starting job search for user ${telegramUserId}...`);
 
+  const openrouterKey = apiKeys?.openrouterKey ?? env.OPENROUTER_API_KEY;
+  const rapidApiKey = apiKeys?.rapidApiKey ?? env.RAPIDAPI_KEY;
+
   try {
     const graph = await buildGraph({ telegramUserId, apiKeys });
     const result = await graph.invoke(
-      { messages: [] },
+      { telegramUserId, openrouterKey, rapidApiKey, messages: [] },
       { configurable: { thread_id: String(telegramUserId) }, recursionLimit: 50 }
     );
 
