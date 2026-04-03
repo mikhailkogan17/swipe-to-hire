@@ -9,7 +9,8 @@ COPY packages/agent/package.json ./packages/agent/package.json
 COPY packages/bot/package.json ./packages/bot/package.json
 
 # Install all production dependencies (including native prebuilds)
-RUN npm install --omit=dev
+# --ignore-scripts: skip `prepare` (husky) which is dev-only
+RUN npm install --omit=dev --ignore-scripts
 
 # Copy source
 COPY packages/types/ ./packages/types/
