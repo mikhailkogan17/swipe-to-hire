@@ -45,9 +45,9 @@ const rootPkgPath = 'package.json';
 const rootPkg = JSON.parse(readFileSync(rootPkgPath, 'utf-8'));
 const [major, minor, patch] = rootPkg.version.split('.').map(Number);
 let newVersion;
-if (bumpType === 'major')      newVersion = `${major + 1}.0.0`;
+if (bumpType === 'major') newVersion = `${major + 1}.0.0`;
 else if (bumpType === 'minor') newVersion = `${major}.${minor + 1}.0`;
-else                           newVersion = `${major}.${minor}.${patch + 1}`;
+else newVersion = `${major}.${minor}.${patch + 1}`;
 rootPkg.version = newVersion;
 writeFileSync(rootPkgPath, JSON.stringify(rootPkg, null, 2) + '\n');
 console.log(`Bumped to v${newVersion}`);
@@ -57,7 +57,7 @@ console.log('Building miniapp...');
 execSync('npm run build:miniapp', { stdio: 'inherit' });
 
 // ── Commit + tag ──────────────────────────────────────────
-execSync(`git add package.json packages/miniapp/dist`, { stdio: 'inherit' });
+execSync(`git add package.json && git add -f packages/miniapp/dist`, { stdio: 'inherit' });
 execSync(`git commit -m "chore: release v${newVersion}"`, { stdio: 'inherit' });
 execSync(`git tag -a v${newVersion} -m "Release v${newVersion}"`, { stdio: 'inherit' });
 console.log(`Tagged v${newVersion}`);
@@ -68,10 +68,9 @@ console.log('Pushed to remote');
 
 // ── Deploy to RPi ─────────────────────────────────────────
 const RPI_HOST = process.env.RPI_HOST ?? 'pi@raspberrypi.local';
-const RPI_DIR  = process.env.RPI_DIR  ?? '/home/pi/swipe-to-hire';
+const RPI_DIR = process.env.RPI_DIR ?? '/home/pi/swipe-to-hire';
 console.log(`Deploying to ${RPI_HOST}:${RPI_DIR}...`);
-execSync(
-  `ssh ${RPI_HOST} "cd ${RPI_DIR} && git pull && docker-compose up -d --build bot"`,
-  { stdio: 'inherit' }
-);
+execSync(`ssh ${RPI_HOST} "cd ${RPI_DIR} && git pull && docker-compose up -d --build bot"`, {
+  stdio: 'inherit',
+});
 console.log(`\nReleased v${newVersion} and deployed to RPi`);
