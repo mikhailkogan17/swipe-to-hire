@@ -1,6 +1,6 @@
 {
   "name": "@swipe-to-hire/backend",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "LangGraph hr pipeline + Telegram bot backend",
   "homepage": "https://github.com/mikhailkogan17/swipe-to-hire#readme",
   "bugs": {
