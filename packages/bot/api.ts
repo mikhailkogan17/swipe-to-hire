@@ -1,25 +1,24 @@
-import Fastify from 'fastify';
 import cors from '@fastify/cors';
-import { env } from '@swipe-to-hire/agent/env.js';
 import {
-  getUser,
-  updateUserPreferences,
-  updateUserSchedule,
-  updateUserRegion,
-  getUserPreferences,
-  getPendingJobs,
-  getLikedJobs,
-  recordSwipe,
   addInsight,
-  getUserInsights,
-  markUserOnboarded,
-  setUserCvUrl,
-  getUserById,
   db,
+  getLikedJobs,
+  getPendingJobs,
+  getUser,
+  getUserInsights,
+  getUserPreferences,
+  markUserOnboarded,
+  recordSwipe,
+  setUserCvUrl,
+  updateUserPreferences,
+  updateUserRegion,
+  updateUserSchedule,
 } from '@swipe-to-hire/agent/db.js';
+import { env } from '@swipe-to-hire/agent/env.js';
 import { buildProfileSetupGraph } from '@swipe-to-hire/agent/graph.js';
-import { runJobSearchForUser } from './scheduler.js';
+import Fastify from 'fastify';
 import { bot, profileReplyWaiters } from './bot.js';
+import { runJobSearchForUser } from './scheduler.js';
 
 const app = Fastify({ logger: false });
 
@@ -84,6 +83,14 @@ app.post<{
     apiKeys: { openrouterKey },
   });
 
+  // Notify user immediately so they know something is happening
+  bot.telegram
+    .sendMessage(
+      telegramUserId,
+      "🚀 Starting your job search... I'll notify you when results are ready."
+    )
+    .catch((err: unknown) => console.error('Failed to send start notification:', err));
+
   // Fire profile setup + job search in background (non-blocking)
   profileGraph
     .invoke({ telegramUserId, openrouterKey, messages: [] })
@@ -95,7 +102,29 @@ app.post<{
         rapidApiKey: user.rapidapi_key ?? undefined,
       });
     })
-    .catch((err: unknown) => console.error('Profile setup / initial search failed:', err));
+    .catch(async (err: unknown) => {
+      console.error('Profile setup / initial search failed:', err);
+
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      let userMsg = '⚠️ Job search encountered an issue. Will retry tomorrow.';
+
+      if (errorMsg.includes('401') || errorMsg.includes('Unauthorized')) {
+        userMsg = '⚠️ Authentication error with AI service. Please contact support.';
+      } else if (errorMsg.includes('429') || errorMsg.includes('rate')) {
+        userMsg = "⚠️ Rate limited by AI service. I'll retry shortly.";
+      } else if (errorMsg.includes('timeout')) {
+        userMsg = '⚠️ Service timed out. Will retry tomorrow at your scheduled time.';
+      } else if (errorMsg.includes('CV') || errorMsg.includes('parse')) {
+        userMsg =
+          '⚠️ Could not extract profile from CV. Please verify the link is accessible and try again.';
+      }
+
+      try {
+        await bot.telegram.sendMessage(telegramUserId, userMsg);
+      } catch (telegramErr) {
+        console.error('Failed to send error notification:', telegramErr);
+      }
+    });
 
   return { success: true };
 });

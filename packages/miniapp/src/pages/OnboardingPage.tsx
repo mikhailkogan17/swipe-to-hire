@@ -1,11 +1,9 @@
+import { CheckCircle, Clock, FileText } from 'lucide-react';
 import { useState } from 'react';
 import { api } from '../api';
-import { FileText, MapPin, Clock, CheckCircle } from 'lucide-react';
+import { localTimeStringToUtcHour, utcHourToLocalTimeString } from '../utils/timezone';
 
-const REGIONS = ['Global', 'EU', 'EMEA', 'LATAM', 'APAC', 'North America'];
-const HOURS = Array.from({ length: 24 }, (_, i) => i);
-
-type Step = 'cv' | 'schedule' | 'done';
+type Step = 'cv' | 'schedule' | 'processing' | 'done';
 
 export function OnboardingPage({ telegramUserId }: { telegramUserId: number }) {
   const [step, setStep] = useState<Step>('cv');
@@ -15,7 +13,7 @@ export function OnboardingPage({ telegramUserId }: { telegramUserId: number }) {
   const [error, setError] = useState('');
 
   const steps: Step[] = ['cv', 'schedule'];
-  const stepIdx = steps.indexOf(step);
+  const stepIdx = steps.indexOf(step as 'cv' | 'schedule');
 
   function toggleRegion(r: string, list: string[], setList: (v: string[]) => void) {
     setList(list.includes(r) ? list.filter(x => x !== r) : [...list, r]);
@@ -29,23 +27,54 @@ export function OnboardingPage({ telegramUserId }: { telegramUserId: number }) {
         telegramUserId,
         cvUrl: cvUrl || undefined,
         scheduleHour,
-        region: 'global', // fallback, agent should extract from CV
+        region: 'global',
       });
+      setStep('processing');
+      setLoading(false);
+
+      // Poll for jobs (max 30s), then show done regardless
+      for (let i = 0; i < 30; i++) {
+        await new Promise<void>(resolve => setTimeout(resolve, 1000));
+        try {
+          const { jobs } = await api.getJobs(telegramUserId);
+          if (jobs.length > 0) {
+            setStep('done');
+            setTimeout(() => window.location.replace('/'), 1200);
+            return;
+          }
+        } catch {
+          // ignore poll errors — keep waiting
+        }
+      }
       setStep('done');
-      // Reload so App picks up onboarded=true
       setTimeout(() => window.location.replace('/'), 1200);
     } catch {
       setError('Something went wrong. Please try again.');
-    } finally {
       setLoading(false);
     }
+  }
+
+  if (step === 'processing') {
+    return (
+      <div className="page fade-up">
+        <div className="empty-state">
+          <div className="empty-icon" style={{ fontSize: 48 }}>
+            ⏳
+          </div>
+          <h2>Setting up...</h2>
+          <p>Extracting your profile from CV and searching jobs. This takes ~20 seconds.</p>
+        </div>
+      </div>
+    );
   }
 
   if (step === 'done') {
     return (
       <div className="page fade-up">
         <div className="empty-state">
-          <div className="empty-icon"><CheckCircle size={48} color="var(--primary)" /></div>
+          <div className="empty-icon">
+            <CheckCircle size={48} color="var(--primary)" />
+          </div>
           <h2>You're all set!</h2>
           <p>Your first job search is starting now. I'll notify you when results are ready.</p>
         </div>
@@ -104,27 +133,31 @@ export function OnboardingPage({ telegramUserId }: { telegramUserId: number }) {
       {step === 'schedule' && (
         <div className="card fade-up" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div>
-            <h2><Clock size={20} style={{ verticalAlign: 'middle', marginRight: 6 }} /> Daily Updates</h2>
+            <h2>
+              <Clock size={20} style={{ verticalAlign: 'middle', marginRight: 6 }} /> Daily Updates
+            </h2>
             <p style={{ marginTop: 4 }}>When should I send you new job matches?</p>
           </div>
           <div className="input-group">
-            <label>Update time (UTC)</label>
-            <select
+            <label>Daily update time (your timezone)</label>
+            <input
+              type="time"
               className="input"
-              value={scheduleHour}
-              onChange={e => setScheduleHour(Number(e.target.value))}
-            >
-              {HOURS.map(h => (
-                <option key={h} value={h}>
-                  {String(h).padStart(2, '0')}:00 UTC
-                </option>
-              ))}
-            </select>
+              value={utcHourToLocalTimeString(scheduleHour)}
+              onChange={e => setScheduleHour(localTimeStringToUtcHour(e.target.value))}
+            />
           </div>
           {error && <p style={{ color: 'var(--red)', fontSize: 13 }}>{error}</p>}
           <div style={{ display: 'flex', gap: 8 }}>
-            <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setStep('cv')}>← Back</button>
-            <button className="btn btn-primary" style={{ flex: 2 }} onClick={finish} disabled={loading}>
+            <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setStep('cv')}>
+              ← Back
+            </button>
+            <button
+              className="btn btn-primary"
+              style={{ flex: 2 }}
+              onClick={finish}
+              disabled={loading}
+            >
               {loading ? '⏳ Saving...' : '🚀 Start Job Search'}
             </button>
           </div>
