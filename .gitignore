@@ -178,3 +178,5 @@ docker-compose.override.yml
 
 # Backup
 *.bak
+
+AGENTS.md
