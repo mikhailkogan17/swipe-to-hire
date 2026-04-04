@@ -1,20 +1,34 @@
 {
-  "folders": [{ "name": "swipe-to-hire", "path": "." }],
+  "folders": [
+    {
+      "name": "swipe-to-hire",
+      "path": ".",
+    },
+    {
+      "name": "EasyOref (reference)",
+      "path": "../EasyOref",
+    },
+  ],
   "settings": {
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
       "source.organizeImports": "explicit",
-      "source.fixAll": "explicit"
+      "source.fixAll": "explicit",
     },
     "editor.rulers": [100],
     "files.autoSave": "afterDelay",
     "files.autoSaveDelay": 1000,
     "files.trimTrailingWhitespace": true,
     "files.insertFinalNewline": true,
+    "files.readonlyInclude": {
+      "**/node_modules/**": true,
+      "**/dist/**": true,
+      "**/easyoref/**": true,
+    },
     "files.associations": {
       "Dockerfile*": "dockerfile",
       "*.yaml": "yaml",
-      "*.yml": "yaml"
+      "*.yml": "yaml",
     },
     "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
     "[typescriptreact]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
@@ -24,24 +38,24 @@
     "[yaml]": { "editor.defaultFormatter": "redhat.vscode-yaml" },
     "[markdown]": {
       "editor.defaultFormatter": "yzhang.markdown-all-in-one",
-      "editor.wordWrap": "on"
+      "editor.wordWrap": "on",
     },
     "yaml.validate": true,
     "yaml.format.enable": true,
     "yaml.schemas": {
-      "https://json.schemastore.org/docker-compose.json": ["docker-compose*.yml"]
+      "https://json.schemastore.org/docker-compose.json": ["docker-compose*.yml"],
     },
     "git.confirmSync": false,
     "git.autofetch": true,
     "files.exclude": {
       "**/.DS_Store": true,
       "**/node_modules": true,
-      "**/dist": true
+      "**/dist": true,
     },
     "search.exclude": {
       "**/node_modules": true,
       "**/.git": true,
-      "**/dist": true
+      "**/dist": true,
     },
     "cSpell.words": [
       "langchain",
@@ -54,8 +68,11 @@
       "miniapp",
       "jsearch",
       "swipe",
-      "sqlite"
-    ]
+      "sqlite",
+    ],
+    "chat.tools.terminal.autoApprove": {
+      "npx tsc": true,
+    },
   },
   "extensions": {
     "recommendations": [
@@ -66,8 +83,8 @@
       "yzhang.markdown-all-in-one",
       "bierner.markdown-mermaid",
       "editorconfig.editorconfig",
-      "streetsidesoftware.code-spell-checker"
-    ]
+      "streetsidesoftware.code-spell-checker",
+    ],
   },
   "launch": {
     "version": "0.2.0",
@@ -79,7 +96,7 @@
         "runtimeExecutable": "npx",
         "runtimeArgs": ["tsx", "packages/bot/index.ts"],
         "console": "integratedTerminal",
-        "cwd": "${workspaceFolder}"
+        "cwd": "${workspaceFolder}",
       },
       {
         "name": "CLI: Run",
@@ -88,8 +105,8 @@
         "runtimeExecutable": "npx",
         "runtimeArgs": ["tsx", "packages/cli/index.ts"],
         "console": "integratedTerminal",
-        "cwd": "${workspaceFolder}"
-      }
-    ]
-  }
+        "cwd": "${workspaceFolder}",
+      },
+    ],
+  },
 }
