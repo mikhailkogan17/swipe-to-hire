@@ -20,7 +20,6 @@ export function getTelegramUserId(): number {
   }
 }
 
-
 function BottomNav() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -66,11 +65,19 @@ function AppRoutes({ profile }: { profile: UserProfile }) {
 
   return (
     <Routes>
-      <Route path="/"         element={withNav(<SwipePage  telegramUserId={profile.telegramUserId} />)} />
-      <Route path="/liked"    element={withNav(<LikedPage  telegramUserId={profile.telegramUserId} />)} />
-      <Route path="/settings" element={withNav(<SettingsPage telegramUserId={profile.telegramUserId} profile={profile} />)} />
+      <Route path="/" element={withNav(<SwipePage telegramUserId={profile.telegramUserId} />)} />
+      <Route
+        path="/liked"
+        element={withNav(<LikedPage telegramUserId={profile.telegramUserId} />)}
+      />
+      <Route
+        path="/settings"
+        element={withNav(
+          <SettingsPage telegramUserId={profile.telegramUserId} profile={profile} />
+        )}
+      />
       <Route path="/onboarding" element={<Navigate to="/" replace />} />
-      <Route path="*"         element={<Navigate to="/" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
@@ -85,9 +92,25 @@ export default function App() {
       setError('Could not identify Telegram user. Please open via bot.');
       return;
     }
-    api.getProfile(telegramUserId)
+    api
+      .getProfile(telegramUserId)
       .then(setProfile)
-      .catch(() => setError('Failed to connect to server.'));
+      .catch((err: unknown) => {
+        // 404 = user not registered yet; show onboarding instead of error
+        if (err instanceof Error && err.message.includes('404')) {
+          setProfile({
+            telegramUserId,
+            onboarded: false,
+            profile: null,
+            preferences: {},
+            scheduleHour: 9,
+            region: 'global',
+            plan: 'free',
+          } as UserProfile);
+        } else {
+          setError('Failed to connect to server.');
+        }
+      });
   }, [telegramUserId]);
 
   if (error) {
