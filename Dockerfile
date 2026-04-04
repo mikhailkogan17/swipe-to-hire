@@ -11,10 +11,11 @@ COPY packages/types/package.json ./packages/types/package.json
 COPY packages/agent/package.json ./packages/agent/package.json
 COPY packages/bot/package.json ./packages/bot/package.json
 
-# Install production deps, skip lifecycle scripts (husky prepare),
-# then rebuild native addons explicitly
-RUN npm install --omit=dev --ignore-scripts && \
-    npm rebuild better-sqlite3
+# Install ALL deps (need devDeps like node-gyp for native compilation),
+# then prune dev deps after build
+RUN npm install --ignore-scripts && \
+    npm rebuild better-sqlite3 && \
+    npm prune --omit=dev
 
 # Copy source
 COPY packages/types/ ./packages/types/
